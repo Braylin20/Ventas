@@ -8,4 +8,5 @@ class RemoteDataSource @Inject constructor(
 ) {
     suspend fun getVentas() = ventasApi.getVentas()
     suspend fun addVenta(ventaDto: VentaDto) = ventasApi.addVentas(ventaDto)
+    suspend fun updateVenta(id: Int, ventaDto: VentaDto) = ventasApi.updateVenta(id,ventaDto)
 }
