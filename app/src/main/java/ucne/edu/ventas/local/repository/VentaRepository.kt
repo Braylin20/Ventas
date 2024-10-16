@@ -18,20 +18,33 @@ class VentaRepository @Inject constructor(
 ) {
     private suspend fun saveVentaLocal(venta: VentaEntity) = ventaDao.save(venta)
     private fun getVentasLocal() = ventaDao.getVentas()
-    fun getVentas(): Flow<Resource<List<VentaEntity>>> = flow{
-        try{
+
+    fun getVentas(): Flow<Resource<List<VentaEntity>>> = flow {
+        try {
             emit(Resource.Loading())
-            val ventas =  remoteDataSource.getVentas()
-            ventas.forEach{ventaDto ->
+            val ventas = remoteDataSource.getVentas()
+            ventas.forEach { ventaDto ->
                 saveVentaLocal(ventaDto.toEntity())
             }
             val ventasLocal = getVentasLocal().firstOrNull()
-            if (ventasLocal.isNullOrEmpty()) {
-                emit(Resource.Error("No se encontraron ventas"))
-            } else {
-                emit(Resource.Success(ventasLocal))
-            }
-        }catch (e: HttpException){
+
+            emit(Resource.Success(ventasLocal?: emptyList()))
+
+        } catch (e: HttpException) {
+            emit(Resource.Error("Error de internet ${e.message}"))
+        } catch (e: Exception) {
+            emit(Resource.Error("Unknown error: ${e.message}"))
+        }
+    }
+
+    fun addVenta(ventaDto: VentaDto): Flow<Resource<VentaEntity>> = flow {
+        try {
+            emit(Resource.Loading())
+            val ventaResource = remoteDataSource.addVenta(ventaDto)
+            val ventaLocal = ventaResource.toEntity()
+            ventaDao.save(ventaLocal)
+            emit(Resource.Success(ventaLocal))
+        } catch (e: HttpException) {
             emit(Resource.Error("Error de internet ${e.message}"))
         } catch (e: Exception) {
             emit(Resource.Error("Unknown error: ${e.message}"))
