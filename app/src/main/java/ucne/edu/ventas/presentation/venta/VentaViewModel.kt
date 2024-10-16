@@ -55,6 +55,9 @@ class VentaViewModel @Inject constructor(
     }
 
     fun addVenta(){
+        if(!isValid()){
+            return
+        }
         viewModelScope.launch {
             val result = ventaRepository.addVenta(uiState.value.toEntity())
             result.collect{ resource->
@@ -79,6 +82,7 @@ class VentaViewModel @Inject constructor(
                                 message = "Guardado Correectamente"
                             )
                         }
+                        nuevo()
                     }
                 }
             }
@@ -129,6 +133,7 @@ class VentaViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 totalDescuento = totalDecuento,
+                totalDescuentoError = if(totalDecuento > 0.0) null else "No puede estar vacío"
             )
         }
 
@@ -148,6 +153,42 @@ class VentaViewModel @Inject constructor(
         }
 
     }
+
+    private fun isValid(): Boolean {
+        var isValid = true
+        if (uiState.value.cliente.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(clienteError = "Cliente no puede estar vacío")
+            }
+            isValid = false
+        }
+        if (uiState.value.totalGalones == null) {
+            _uiState.update {
+                it.copy(totalGalonesError = "Cantidad de galones no puede estar vacío")
+            }
+            isValid = false
+        }
+        if(uiState.value.totalDescuento == null){
+            _uiState.update {
+                it.copy(totalDescuentoError = "Total descuento no puede estar vacío")
+            }
+            isValid = false
+        }
+        if(uiState.value.descuento == null){
+            _uiState.update {
+                it.copy(descuentoError = "Total descuento no puede estar vacío")
+            }
+            isValid = false
+        }
+        if(uiState.value.total == null || (uiState.value.total?:0.0) < 0){
+            _uiState.update {
+                it.copy(totalError = "Total no puede estar vacío o ser menor a 0")
+            }
+            isValid = false
+        }
+        return isValid
+    }
+
     private fun nuevo(){
         _uiState.update {
             it.copy(
@@ -187,7 +228,7 @@ class VentaViewModel @Inject constructor(
         val totalError: String? = null,
     )
 
-    fun UiState.toEntity() = VentaDto(
+    private fun UiState.toEntity() = VentaDto(
         ventaId= ventaId?:0,
         cliente = cliente?:"",
         precio = precio?:0.0,

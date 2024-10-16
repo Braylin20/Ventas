@@ -107,7 +107,7 @@ fun VentaCreateBodyScreen(
                     onValueChange = onClienteChange,
                     label = { Text("Cliente") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = uiState.message != null && uiState.message == "Cliente no puede estar vacío",
+                    isError = uiState.clienteError != null
                 )
                 if (uiState.clienteError != null) {
                     Text(
@@ -121,7 +121,8 @@ fun VentaCreateBodyScreen(
                     onValueChange = {onCantidadGalonesChange(it.toDouble())},
                     label = { Text("Cantidad de Galones") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    isError = uiState.totalGalonesError != null
                 )
                 if (uiState.totalGalonesError != null) {
                     Text(
@@ -135,20 +136,30 @@ fun VentaCreateBodyScreen(
                     onValueChange = {onDescuentoChange(it.toDouble())},
                     label = { Text("Descuento") },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    isError = uiState.descuentoError != null
                 )
+                if (uiState.descuentoError != null) {
+                    Text(
+                        text = uiState.descuentoError,
+                        color = Color.Red,
+                        fontSize = 14.sp
+                    )
+                }
                 OutlinedTextField(
                     label = { Text("Precio") },
                     value = uiState.precio?.toString()?:"",
                     onValueChange = {onPrecioChange(it.toDouble())},
                     modifier = Modifier.fillMaxWidth(),
-                    readOnly = true
+                    readOnly = true,
+                    isError = uiState.precioError != null
                 )
                 OutlinedTextField(
                     value = uiState.totalDescuento?.toString()?:"",
                     onValueChange = {},
                     label = { Text("Total Descontado") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = uiState.totalDescuentoError != null
                 )
                 if (uiState.totalDescuentoError != null) {
                     Text(
@@ -162,7 +173,8 @@ fun VentaCreateBodyScreen(
                     onValueChange = {onTotalChange()},
                     label = { Text("Total") },
                     modifier = Modifier.fillMaxWidth(),
-                    readOnly = true
+                    readOnly = true,
+                    isError = uiState.totalError != null
                 )
                 if (uiState.totalError != null) {
                     Text(
