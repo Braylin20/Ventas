@@ -35,11 +35,11 @@ fun VentaCreateScreen(
     onBack: () -> Unit,
     ventaId: Int
 ) {
-//    LaunchedEffect(key1 = ventaId) {
-//        if(ventaId>0){
-//            viewModel.selectedVenta(ventaId)
-//        }
-//    }
+    LaunchedEffect(key1 = ventaId) {
+        if(ventaId>0){
+            viewModel.selectVenta(ventaId)
+        }
+    }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     VentaCreateBodyScreen(
         uiState = uiState,
@@ -49,7 +49,6 @@ fun VentaCreateScreen(
         onPrecioChange = viewModel::onPrecioChange,
         onCantidadGalonesChange = viewModel::onCantidadGalonesChange,
         onDescuentoChange = viewModel::onDescuentoChange,
-
         onTotalChange = viewModel::onTotalChange,
         ventaId = ventaId
     )

@@ -50,4 +50,31 @@ class VentaRepository @Inject constructor(
             emit(Resource.Error("Unknown error: ${e.message}"))
         }
     }
+
+    fun updateProduct(id: Int, ventaDto: VentaDto): Flow<Resource<VentaEntity>> = flow {
+        try {
+            emit(Resource.Loading())
+            val ventaRemote = remoteDataSource.updateVenta(id, ventaDto)
+            val ventaLocal = ventaRemote.toEntity()
+            ventaDao.save(ventaLocal)
+            emit(Resource.Success(ventaLocal))
+        } catch (e: HttpException) {
+            emit(Resource.Error("Error de conexión ${e.message()}"))
+        } catch (e: Exception) {
+            emit(Resource.Error("Unknown error: ${e.message}"))
+        }
+    }
+    fun findVenta(id: Int): Flow<Resource<VentaEntity>> = flow{
+        try {
+            emit(Resource.Loading())
+            val venta = ventaDao.find(id)
+            if (venta != null) {
+                emit(Resource.Success(venta))
+            } else {
+                emit(Resource.Error("No se encontró la venta"))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error("Error ${e.message}"))
+        }
+    }
 }

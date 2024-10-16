@@ -59,7 +59,11 @@ class VentaViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            val result = ventaRepository.addVenta(uiState.value.toEntity())
+            val result =if((uiState.value.ventaId?:0) > 0){
+                ventaRepository.updateProduct((uiState.value.ventaId?:0), uiState.value.toEntity())
+            }else{
+                ventaRepository.addVenta(uiState.value.toEntity())
+            }
             result.collect{ resource->
                 when(resource){
                     is Resource.Error -> {
@@ -72,7 +76,7 @@ class VentaViewModel @Inject constructor(
                     is Resource.Loading -> {
                         _uiState.update {
                             it.copy(
-                                message = ""
+                                message = "Guardando"
                             )
                         }
                     }
@@ -89,6 +93,36 @@ class VentaViewModel @Inject constructor(
         }
     }
 
+    fun selectVenta(id: Int) {
+        viewModelScope.launch {
+            ventaRepository.findVenta(id).collectLatest { result ->
+                when(result) {
+                    is Resource.Loading -> {
+                        _uiState.update {
+                            it.copy(isLoading = true)
+                        }
+                    }
+                    is Resource.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                ventaId = result.data?.ventaId,
+                                totalGalones = result.data?.totalGalones ?: 0.0,
+                                cliente = result.data?.cliente ?: "",
+                                descuento = result.data?.descuento ?: 0.0,
+                                totalDescuento = result.data?.totalDescuento ?: 0.0,
+                                total = result.data?.total ?: 0.0
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        _uiState.update {
+                            it.copy(message = result.message ?: "Unknown Error")
+                        }
+                    }
+                }
+            }
+        }
+    }
     fun onClienteChange(cliente: String) {
         _uiState.update {
             it.copy(
